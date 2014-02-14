@@ -105,4 +105,8 @@
 @property (assign) unsigned long long bytesDownloadedSoFar;
 @property (assign) unsigned long long totalBytesToDownload;
 
+///增加失败和完成的block
+@property (strong) void(^queueFail)(ASIHTTPRequest *request);
+@property (strong) void(^queueComplete)(ASIHTTPRequest *request);
+
 @end

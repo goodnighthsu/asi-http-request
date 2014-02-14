@@ -211,6 +211,8 @@
 			[[self delegate] performSelector:[self queueDidFinishSelector] withObject:self];
 		}
 	}
+    //block
+    self.queueComplete(request);
 }
 
 - (void)requestFailed:(ASIHTTPRequest *)request
@@ -227,6 +229,8 @@
 	if ([self shouldCancelAllRequestsOnFailure] && [self requestsCount] > 0) {
 		[self cancelAllOperations];
 	}
+    //block
+    self.queueFail(request);
 	
 }
 
