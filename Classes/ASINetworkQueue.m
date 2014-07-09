@@ -40,6 +40,10 @@
 		[request setQueue:nil];
 	}
 	[userInfo release];
+    
+    //清空新增加的block
+    [self cleanBlock];
+    
 	[super dealloc];
 }
 
@@ -65,6 +69,9 @@
 
 - (void)go
 {
+    if (self.queueStart) {
+        self.queueStart(self);
+    }
 	[self setSuspended:NO];
 }
 
@@ -185,10 +192,6 @@
 	if ([self requestDidStartSelector]) {
 		[[self delegate] performSelector:[self requestDidStartSelector] withObject:request];
 	}
-    
-    if (self.queueStart) {
-        self.queueStart(request);
-    }
 }
 
 - (void)request:(ASIHTTPRequest *)request didReceiveResponseHeaders:(NSDictionary *)responseHeaders
@@ -217,7 +220,8 @@
 		}
         //block
         if (self.queueComplete) {
-            self.queueComplete(request);
+            self.queueComplete(self);
+            [self cleanBlock];
         }
 	}
 }
@@ -229,14 +233,23 @@
 		[[self delegate] performSelector:[self requestDidFailSelector] withObject:request];
         
 	}
+    
+    //block
+    if (self.queueFail) {
+        self.queueFail(request);
+    }
+    
 	if ([self requestsCount] == 0) {
 		if ([self queueDidFinishSelector]) {
 			[[self delegate] performSelector:[self queueDidFinishSelector] withObject:self];
 		}
+        
         //block
-        if (self.queueFail) {
-            self.queueFail(request);
+        if (self.queueComplete) {
+            self.queueComplete(self);
+            [self cleanBlock];
         }
+
 	}
 	if ([self shouldCancelAllRequestsOnFailure] && [self requestsCount] > 0) {
 		[self cancelAllOperations];
@@ -326,6 +339,7 @@
 	return [super respondsToSelector:selector];
 }
 
+
 #pragma mark NSCopying
 
 - (id)copyWithZone:(NSZone *)zone
@@ -347,6 +361,23 @@
 }
 
 
+#pragma mark - Clean Block
+- (void)cleanBlock
+{
+    [queueStart release];
+    queueStart = NULL;
+    
+    [queueFail release];
+    queueFail = NULL;
+    
+    [queueComplete release];
+    queueComplete = NULL;
+    
+    [queueProgress release];
+    queueProgress = NULL;
+}
+
+
 @synthesize requestsCount;
 @synthesize bytesUploadedSoFar;
 @synthesize totalBytesToUpload;
@@ -364,4 +395,9 @@
 @synthesize delegate;
 @synthesize showAccurateProgress;
 @synthesize userInfo;
+
+@synthesize queueStart;
+@synthesize queueFail;
+@synthesize queueComplete;
+@synthesize queueProgress;
 @end

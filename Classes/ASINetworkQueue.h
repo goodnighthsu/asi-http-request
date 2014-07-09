@@ -107,9 +107,9 @@
 @property (assign) unsigned long long totalBytesToDownload;
 
 ///增加失败和完成的block
-@property (strong) void(^queueStart)(ASIFormDataRequest *request);
-@property (strong) void(^queueFail)(ASIFormDataRequest *request);
-@property (strong) void(^queueComplete)(ASIFormDataRequest *request);
-@property (strong) void(^queueProgress)(long long byetes, long long total);
+@property (copy) void(^queueStart)(ASINetworkQueue *queue);
+@property (copy) void(^queueFail)(ASIFormDataRequest *request);
+@property (copy) void(^queueComplete)(ASINetworkQueue *queue);
+@property (copy) void(^queueProgress)(long long byetes, long long total);
 
 @end
